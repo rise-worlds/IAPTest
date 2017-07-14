@@ -292,6 +292,7 @@
 
     NSError *jsonError = nil;
     NSString *receiptBase64 = [NSString base64StringFromData:receiptData length:[receiptData length]];
+	NSString *result = [[NSString alloc] initWithData:receiptData  encoding:NSUTF8StringEncoding];
 
 
     NSData *jsonData = nil;
@@ -344,13 +345,55 @@
     }
 }
 
+- (void)checkReceipt2:(NSData*)receiptData onCompletion:(checkReceiptCompleteResponseBlock)completion
+{
+	self.checkReceiptCompleteBlock = completion;
+	
+	NSError *jsonError = nil;
+	NSString *receiptBase64 = [NSString base64StringFromData:receiptData length:[receiptData length]];
+	NSString *result = [[NSString alloc] initWithData:receiptData  encoding:NSUTF8StringEncoding];
+	
+	
+	NSData *jsonData = [NSJSONSerialization dataWithJSONObject:[NSDictionary dictionaryWithObjectsAndKeys:
+																receiptBase64,@"receipt",
+																_production,@"production",
+																100103,@"user",
+																"test",@"type",
+																nil]
+													   options:NSJSONWritingPrettyPrinted
+														 error:&jsonError
+						];
+	
+	
+	//    NSString* jsonStr = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
+	
+	NSURL *requestURL = [NSURL URLWithString:@"https://sandbox.itunes.apple.com/verifyReceipt"];
+	
+	NSMutableURLRequest *req = [[NSMutableURLRequest alloc] initWithURL:requestURL];
+	[req setHTTPMethod:@"POST"];
+	[req setHTTPBody:jsonData];
+	
+	NSURLConnection *conn = [[NSURLConnection alloc] initWithRequest:req delegate:self];
+	if(conn) {
+		self.receiptRequestData = [[NSMutableData alloc] init];
+	} else {
+		NSError* error = nil;
+		NSMutableDictionary* errorDetail = [[NSMutableDictionary alloc] init];
+		[errorDetail setValue:@"Can't create connection" forKey:NSLocalizedDescriptionKey];
+		error = [NSError errorWithDomain:@"IAPHelperError" code:100 userInfo:errorDetail];
+		if(_checkReceiptCompleteBlock) {
+			_checkReceiptCompleteBlock(nil,error);
+		}
+	}
+}
+
 -(void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error {
     NSLog(@"Cannot transmit receipt data. %@",[error localizedDescription]);
-    
+	
     if(_checkReceiptCompleteBlock) {
         _checkReceiptCompleteBlock(nil,error);
     }
-    
+	
 }
 
 -(void)connection:(NSURLConnection *)connection didReceiveResponse:(NSURLResponse *)response {

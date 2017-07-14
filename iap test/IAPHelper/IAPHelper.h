@@ -46,6 +46,7 @@ typedef void (^resoreProductsCompleteResponseBlock) (SKPaymentQueue* payment,NSE
 - (void)checkReceipt:(NSData*)receiptData onCompletion:(checkReceiptCompleteResponseBlock)completion;
 
 - (void)checkReceipt:(NSData*)receiptData AndSharedSecret:(NSString*)secretKey onCompletion:(checkReceiptCompleteResponseBlock)completion;
+- (void)checkReceipt2:(NSData*)receiptData onCompletion:(checkReceiptCompleteResponseBlock)completion;
 
 
 //saved purchased product

@@ -31,7 +31,7 @@
 	[[IAPShare sharedHelper].iap requestProductsWithCompletion:^(SKProductsRequest* request,SKProductsResponse* response)
 	 {
 		 if(response > 0 ) {
-			 SKProduct* product =[[IAPShare sharedHelper].iap.products objectAtIndex:0];
+			 SKProduct* product =[[IAPShare sharedHelper].iap.products objectAtIndex:5];
 			 
 			 NSLog(@"Price: %@",[[IAPShare sharedHelper].iap getLocalePrice:product]);
 			 NSLog(@"Title: %@",product.localizedTitle);
@@ -44,8 +44,12 @@
 												NSLog(@"Fail %@",[trans.error localizedDescription]);
 											}
 											else if(trans.transactionState == SKPaymentTransactionStatePurchased) {
+												NSData *data = [NSData dataWithContentsOfURL:[[NSBundle mainBundle] appStoreReceiptURL]];
+
 												
-												[[IAPShare sharedHelper].iap checkReceipt:[NSData dataWithContentsOfURL:[[NSBundle mainBundle] appStoreReceiptURL]] AndSharedSecret:@"4b743ed8da1443e7825590acf3b7c440" onCompletion:^(NSString *response, NSError *error) {
+												[[IAPShare sharedHelper].iap checkReceipt2:data onCompletion:^(NSString *response, NSError *error) {
+												//[[IAPShare sharedHelper].iap checkReceipt:data
+												//					AndSharedSecret:@"4b743ed8da1443e7825590acf3b7c440" onCompletion:^(NSString *response, NSError *error) {
 													
 													//Convert JSON String to NSDictionary
 													NSDictionary* rec = [IAPShare toJSON:response];
